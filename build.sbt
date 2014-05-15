@@ -2,7 +2,7 @@ import AssemblyKeys._
 
 seq(assemblySettings: _*)
 
-name := "ScalaDummyProject"
+name := "CollectionLab"
 
 version := "v2014-03-30"
 
