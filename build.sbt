@@ -4,21 +4,21 @@ seq(assemblySettings: _*)
 
 name := "CollectionLab"
 
-version := "v2014-03-30"
+version := "v2014-05-15"
 
 scalaVersion := "2.10.4"
 
-scalacOptions ++= Seq("-unchecked", "-deprecation" )
+scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
 
-mainClass in assembly := Some("dummy.Dummy")
+mainClass in assembly := Some("collectionlab.Dummy")
 
-jarName in assembly := "dummy.jar"
+jarName in assembly := "collectionlab.jar"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.+" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.+" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.+" % "test"
 
-initialCommands in console := """import dummy._"""
+initialCommands in console := """import collectionlab._"""
 
 sourceGenerators in Compile <+= 
  (sourceManaged in Compile, version, name, jarName in assembly) map {
