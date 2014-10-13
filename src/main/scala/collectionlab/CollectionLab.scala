@@ -25,18 +25,26 @@ trait Cell[T,+V] {
 case class BasicCell(time:Long, value:Double) extends Cell[Long,Double]
 
 
-class Series[+C](backend:Vector[C]=Vector.empty) {
-  def +[B>:C](that:B):Series[B] = new Series[B](backend :+ that)
+
+class Series[+C](val name:String, protected val backend:Vector[C]=Vector.empty) {
+  def +[B>:C](that:B):Series[B] = new Series[B](name, backend :+ that)
+  def ++[B>:C](that:Iterable[B]):Series[B] = new Series[B](name, backend ++ that)
+  override def toString:String = {
+    val max=5
+    val name=getClass.getName().split("[.]").last
+    if (backend.size<max ) s"$name(${backend.mkString(",")})"
+    else s"$name(${backend.take(max).mkString(",")},...)"
+  }
 }
 
 
 
 object CollectionLab {
   def main(args:Array[String]) {
-    val s = new Series[Cell[Long,Double]]()
+    val s = new Series[Cell[Long,Double]]("truc")
     
-    val x = s + BasicCell(10,32d)
+    val x = s + BasicCell(10,32d) + BasicCell(15,6)
     
-    println(x)
+    println(x+x)
   }
 }
