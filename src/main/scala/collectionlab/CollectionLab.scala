@@ -20,6 +20,7 @@ package collectionlab
 trait Cell[T,+V] {
   val time:T
   val value:V
+  //override def toString()=s"Cell($time, $value)"
 }
 
 case class BasicCell(time:Long, value:Double) extends Cell[Long,Double]
@@ -30,6 +31,7 @@ case class OtherCell(time:Long, value:Double, count:Long) extends Cell[Long,Doub
 class Series[+C](val name:String, protected val backend:Vector[C]=Vector.empty) {
   def +[B>:C](that:B):Series[B] = new Series[B](name, backend :+ that)
   def ++[B>:C](that:Iterable[B]):Series[B] = new Series[B](name, backend ++ that)
+  def filter(cdt: C => Boolean) = new Series[C](name, backend.filter(cdt))
   override def toString:String = {
     val max=5
     val name=getClass.getName().split("[.]").last
@@ -44,8 +46,8 @@ object CollectionLab {
   def main(args:Array[String]) {
     val s = new Series[Cell[Long,Double]]("truc")
     
-    val x = s + BasicCell(10,32d) + BasicCell(15,6) + OtherCell(16,32,2)
+    val x = s + BasicCell(10,32d) + BasicCell(15,6) + OtherCell(16,9,2)
     
-    println(x+x)
+    println(x.filter(_.value < 32))
   }
 }
