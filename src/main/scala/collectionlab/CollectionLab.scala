@@ -16,11 +16,27 @@
 
 package collectionlab
 
+
+trait Cell[T,+V] {
+  val time:T
+  val value:V
+}
+
+case class BasicCell(time:Long, value:Double) extends Cell[Long,Double]
+
+
+class Series[+C](backend:Vector[C]=Vector.empty) {
+  def +[B>:C](that:B):Series[B] = new Series[B](backend :+ that)
+}
+
+
+
 object CollectionLab {
-  import MetaInfo._
-  val userName = util.Properties.userName
-  val message = s"Hello ${userName} by ${project} release ${version}."
   def main(args:Array[String]) {
-    println(message)
+    val s = new Series[Cell[Long,Double]]()
+    
+    val x = s + BasicCell(10,32d)
+    
+    println(x)
   }
 }
