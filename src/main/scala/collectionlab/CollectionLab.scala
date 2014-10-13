@@ -24,6 +24,7 @@ trait Cell[T,+V] {
 
 case class BasicCell(time:Long, value:Double) extends Cell[Long,Double]
 
+case class OtherCell(time:Long, value:Double, count:Long) extends Cell[Long,Double]
 
 
 class Series[+C](val name:String, protected val backend:Vector[C]=Vector.empty) {
@@ -43,7 +44,7 @@ object CollectionLab {
   def main(args:Array[String]) {
     val s = new Series[Cell[Long,Double]]("truc")
     
-    val x = s + BasicCell(10,32d) + BasicCell(15,6)
+    val x = s + BasicCell(10,32d) + BasicCell(15,6) + OtherCell(16,32,2)
     
     println(x+x)
   }
