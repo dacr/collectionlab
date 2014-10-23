@@ -6,7 +6,7 @@ name := "CollectionLab"
 
 version := "v2014-05-15"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.2"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
 

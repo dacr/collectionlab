@@ -23,10 +23,9 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class CollectionLabTest extends FunSuite with ShouldMatchers {
-  
+
   test("Simple test") {
-    CollectionLab.message should startWith("Hello")
     info("Test done")
   }
-  
+
 }
