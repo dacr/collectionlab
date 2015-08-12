@@ -1,12 +1,8 @@
-import AssemblyKeys._
-
-seq(assemblySettings: _*)
-
 name := "CollectionLab"
 
-version := "v2014-05-15"
+version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
 
@@ -14,11 +10,12 @@ mainClass in assembly := Some("collectionlab.Dummy")
 
 jarName in assembly := "collectionlab.jar"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.+" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.+" % "test"
 
-libraryDependencies += "junit" % "junit" % "4.+" % "test"
-
-initialCommands in console := """import collectionlab._"""
+initialCommands in console := 
+"""|
+   |import collectionlab._
+   |""".stripMargin
 
 sourceGenerators in Compile <+= 
  (sourceManaged in Compile, version, name, jarName in assembly) map {

@@ -19,42 +19,80 @@ package collectionlab
 import collection.IndexedSeq
 import collection.IndexedSeqLike
 
+import scala.collection._
+import scala.collection.generic._
+import collection.mutable.Builder
+import collection.generic.CanBuildFrom
+import collection.immutable.{ Vector, VectorBuilder }
+import scala.annotation.tailrec
+import scala.collection.generic.GenericCompanion
+import scala.collection.mutable.{ Builder, ListBuffer }
+
+
 trait Cell[T,+V] {
   val time:T
   val value:V
-  //override def toString()=s"Cell($time, $value)"
+  override def toString()=s"Cell($time, $value)"
 }
 
 case class BasicCell(time:Long, value:Double) extends Cell[Long,Double]
 
 case class OtherCell(time:Long, value:Double, count:Long) extends Cell[Long,Double]
 
-//
-//object Series {
-//  def newBuilder[C <: Cell](name: String, tm: TimeModel, alias: String)(implicit builder: CellBuilder[C]): Builder[C, Series[C]] = {
-//    new VectorBuilder mapResult { x: Vector[C] => fromVector(name, tm, alias, x) }
-//  }
-//
-//  implicit def canBuildFrom[C <: Cell](implicit builder: CellBuilder[C]): CanBuildFrom[Series[_], C, Series[C]] =
-//    new CanBuildFrom[Series[_], C, Series[C]] {
-//      def apply(): Builder[C, Series[C]] = newBuilder("default", 1L, "default")
-//      def apply(from: Series[_]): Builder[C, Series[C]] = newBuilder(from.name, from.tm, from.alias)
-//    }
-//
+
+
+
+//final class SeriesBuilder[C, Coll <: Series[C]](empty:Coll) extends Builder[C, Coll] {
+//  protected var elems:Coll = empty
+//  override def +=(cell: C): this.type = {elems = elems + cell ; this}
+//  override def clear():Unit = {elems = empty}
+//  override def result(): Coll = elems
 //}
 
-class Series[+C](protected val backend:Vector[C]=Vector.empty)
-//  extends IndexedSeq[C]
-//  with IndexedSeqLike[C, Series[C]]
-{
-  
-//  import collection.mutable.Builder
-//  override protected[this] def newBuilder: Builder[C, Series[C]] = Series.newBuilder(name, tm, alias)
 
+
+
+object Series extends IndexedSeqFactory[Series] {
+//  def apply[C](): Series[C] = new Series()
+//  implicit def canBuildFrom[C]: CanBuildFrom[Coll, C, Series[C]] = 
+//    ReusableCBF.asInstanceOf[GenericCanBuildFrom[C]]
+//  override def newBuilder[C]: Builder[C, Series[C]] = new SeriesBuilder(empty)  
+//  override def empty[C]: Series[C] = Series[C]()
   
+  implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, Series[A]] = new GenericCanBuildFrom[A]
+  def newBuilder[A] = new scala.collection.mutable.LazyBuilder[A,Series[A]] {
+    def result = {
+      val data = parts.foldLeft(List[A]()){(l,n) => l ++ n}
+      new Series(data)
+    }
+  }
+}
+
+
+
+
+class Series[+C](protected val backend:List[C]=List.empty)
+   extends AbstractSeq[C]
+     with IndexedSeq[C]
+     with GenericTraversableTemplate[C, Series]
+     with IndexedSeqLike[C, Series[C]]
+     with Serializable
+{
+  override def companion:GenericCompanion[Series] = Series
+  override def apply(idx: Int): C = backend(idx)
+  override def length: Int = backend.length
+//  override def filter(cdt: C => Boolean):Series[C] = {
+//    val builder = companion.newBuilder[C]
+//    backend.filter(cdt).foreach{x => builder+=x}
+//    builder.result()
+//  }
+//
+//  
   def +[B>:C](that:B):Series[B] = new Series[B](backend :+ that)
   def ++[B>:C](that:Iterable[B]):Series[B] = new Series[B](backend ++ that)
-  def filter(cdt: C => Boolean) = new Series[C](backend.filter(cdt))
+  
+  
+  
   override def toString:String = {
     val max=5
     val name=getClass.getName().split("[.]").last
@@ -63,19 +101,45 @@ class Series[+C](protected val backend:Vector[C]=Vector.empty)
   }
 }
 
-class NamedSeries[+C](val name:String) extends Series[C]
+
+
+object NamedSeries extends IndexedSeqFactory[NamedSeries] {
+//  def apply[C](): NamedSeries[C] = new NamedSeries("")
+//  implicit def canBuildFrom[C]: CanBuildFrom[Coll, C, Series[C]] = 
+//    ReusableCBF.asInstanceOf[GenericCanBuildFrom[C]]
+//  override def newBuilder[C]: Builder[C, NamedSeries[C]] = new SeriesBuilder(empty)  
+//  override def empty[C]: NamedSeries[C] = new NamedSeries[C]("")
+  implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, NamedSeries[A]] = new GenericCanBuildFrom[A]
+  def newBuilder[A] = new scala.collection.mutable.LazyBuilder[A,NamedSeries[A]] {
+    def result = {
+      val data = parts.foldLeft(List[A]()){(l,n) => l ++ n}
+      new NamedSeries("", data)
+    }
+  }
+}
+
+class NamedSeries[+C](val name:String, protected val backend:List[C]=List.empty)
+     extends Series[C](backend)
+     with IndexedSeq[C]
+     with GenericTraversableTemplate[C, NamedSeries]
+     with IndexedSeqLike[C, NamedSeries[C]]
+     with Serializable {
+  override def companion = NamedSeries
+  }
 
 
 
 object CollectionLab {
   def main(args:Array[String]) {
-    val ns = new NamedSeries[Cell[Long,Double]]("truc")
+    val ns = new NamedSeries[BasicCell]("truc")
     
-    val x = ns + BasicCell(10,32d) + BasicCell(15,6) + OtherCell(16,9,2)
+    val x = ns + BasicCell(10,32d) + BasicCell(15,6) //+ OtherCell(16,9,2)
     
     val fx = x.filter(_.value < 32)
     
-    val as = ns ++ (new Series[Cell[Long,Double]]() + BasicCell(1,0))
+    val as = fx ++ (new Series[BasicCell]() + BasicCell(1,0))
     
+    println(fx)
+    println(as)
   }
 }
